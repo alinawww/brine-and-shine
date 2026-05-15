@@ -37,6 +37,19 @@ export default function MyJars() {
 
   return (
     <main className="max-w-2xl mx-auto px-4 py-10">
+      <p style={{
+        fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 700,
+        textTransform: 'uppercase', letterSpacing: '0.18em',
+        color: '#7A5A9E', marginBottom: 16,
+        display: 'flex', alignItems: 'center', gap: 8,
+      }}>
+        <span style={{
+          width: 8, height: 8, borderRadius: '50%',
+          background: '#D4E842', boxShadow: '0 0 0 3px rgba(212,232,66,0.3)',
+          display: 'inline-block', flexShrink: 0,
+        }} />
+        step four · wait
+      </p>
       <div className="flex items-center justify-between mb-8">
         <h1
           className="text-4xl text-cosmos"
