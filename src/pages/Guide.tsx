@@ -1,159 +1,40 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { INGREDIENTS, READY_MADE, type ReadyMade } from '../data/ingredients';
 import { IngredientIcon } from '../components/IngredientIcons';
+import { BRINE_VARIANTS } from '../data/brineVariants';
 
-// ── Brine variants ───────────────────────────────────────────
+// ── Line renderer ─────────────────────────────────────────────
 
-const BRINE_VARIANTS: Record<string, {
-  salt:    { brine: string; timeline: string; proTip: string };
-  vinegar: { brine: string; timeline: string; proTip: string };
-}> = {
-  cucumber: {
-    salt: {
-      brine:    '2% salt brine (20g salt per 1L water). Submerge fully.',
-      timeline: 'Ready in 3–7 days at room temperature.',
-      proTip:   'Add a grape leaf or horseradish leaf to keep them crunchy — the tannins work wonders.',
-    },
-    vinegar: {
-      brine:    '1:1 white vinegar to water, 1 tbsp salt, 1 tsp sugar per cup.',
-      timeline: 'Ready in 24–48 hours in the fridge.',
-      proTip:   "Pour the hot brine over the cucumbers for a quicker pickle — they'll be ready overnight.",
-    },
-  },
-  carrot: {
-    salt: {
-      brine:    '2% salt brine (20g salt per 1L water).',
-      timeline: 'Ready in 5–10 days at room temperature.',
-      proTip:   'Cut into sticks or coins — coins ferment faster but sticks stay crunchier.',
-    },
-    vinegar: {
-      brine:    '1:1 apple cider vinegar to water, 1 tbsp honey, 1 tsp salt.',
-      timeline: 'Ready in 24 hours in the fridge.',
-      proTip:   'Apple cider vinegar adds a subtle sweetness that pairs beautifully with carrots.',
-    },
-  },
-  jalapeno: {
-    salt: {
-      brine:    '3% salt brine (30g salt per 1L water).',
-      timeline: 'Ready in 5–7 days at room temperature.',
-      proTip:   'Score the jalapeños slightly so brine penetrates faster and fermentation is more even.',
-    },
-    vinegar: {
-      brine:    '1:1 white vinegar to water, 1 tbsp salt, 1 tsp sugar.',
-      timeline: 'Ready in 2–4 days in the fridge.',
-      proTip:   'Leave the seeds in for full heat, remove for a milder pickle. Your call.',
-    },
-  },
-  redOnion: {
-    salt: {
-      brine:    '2% salt brine (20g salt per 1L water).',
-      timeline: 'Ready in 2–3 days at room temperature.',
-      proTip:   'Slice thinly and evenly — uniform slices ferment at the same rate.',
-    },
-    vinegar: {
-      brine:    '1:1 red wine vinegar to water, 1 tbsp sugar, 1 tsp salt.',
-      timeline: 'Ready in 1 hour in the fridge. Better after 24 hours.',
-      proTip:   'Pour boiling brine over the onions to accelerate the colour transformation to magenta.',
-    },
-  },
-  beet: {
-    salt: {
-      brine:    '2% salt brine (20g salt per 1L water).',
-      timeline: 'Ready in 7–14 days at room temperature.',
-      proTip:   'Wear gloves — beet will stain your hands and everything else. Worth it.',
-    },
-    vinegar: {
-      brine:    '1:1 apple cider vinegar to water, 2 tbsp sugar, 1 tsp salt.',
-      timeline: 'Ready in 3–5 days in the fridge.',
-      proTip:   'Roast the beets first for a deeper, sweeter flavour before pickling.',
-    },
-  },
-  greenBean: {
-    salt: {
-      brine:    '2% salt brine (20g salt per 1L water).',
-      timeline: 'Ready in 5–7 days at room temperature.',
-      proTip:   'Pack them vertically in the jar — they stay crunchier and look more impressive.',
-    },
-    vinegar: {
-      brine:    '1:1 white vinegar to water, 1 tbsp salt, 1 tsp sugar.',
-      timeline: 'Ready in 3–5 days in the fridge.',
-      proTip:   'Blanch for 30 seconds before pickling to lock in the green colour.',
-    },
-  },
-  cauliflower: {
-    salt: {
-      brine:    '2% salt brine (20g salt per 1L water).',
-      timeline: 'Ready in 7–14 days at room temperature.',
-      proTip:   "Add a small beetroot for the most stunning pink cauliflower you've ever seen.",
-    },
-    vinegar: {
-      brine:    '1:1 white vinegar to water, 1 tbsp salt, 1 tsp turmeric.',
-      timeline: 'Ready in 5–7 days in the fridge.',
-      proTip:   'Turmeric turns it golden yellow — visually stunning and anti-inflammatory.',
-    },
-  },
-  radish: {
-    salt: {
-      brine:    '2% salt brine (20g salt per 1L water).',
-      timeline: 'Ready in 3–5 days at room temperature.',
-      proTip:   'Use a mix of radish varieties for a visually striking jar.',
-    },
-    vinegar: {
-      brine:    '1:1 rice vinegar to water, 1 tbsp sugar, 1 tsp salt.',
-      timeline: 'Ready in 1–2 days in the fridge.',
-      proTip:   'Rice vinegar gives a lighter, more delicate flavour — perfect for radishes.',
-    },
-  },
-  cabbage: {
-    salt: {
-      brine:    'No brine needed — massage 2% salt (20g per 1kg cabbage) directly into shredded cabbage.',
-      timeline: 'Ready in 7–21 days at room temperature.',
-      proTip:   'Massage the salt in vigorously until the cabbage releases enough liquid to submerge itself — usually 10 minutes.',
-    },
-    vinegar: {
-      brine:    '1:1 apple cider vinegar to water, 1 tbsp sugar, 1 tsp salt.',
-      timeline: 'Ready in 24–48 hours in the fridge.',
-      proTip:   "Quick vinegar-pickled cabbage is great for slaws — it won't have probiotics but it's crunchy and tangy.",
-    },
-  },
-  garlic: {
-    salt: {
-      brine:    '2% salt brine (20g salt per 1L water).',
-      timeline: 'Ready in 30+ days. Better at 60 days. Worth every day.',
-      proTip:   'Peel but keep cloves whole. The longer they ferment, the more mellow and nutty they become.',
-    },
-    vinegar: {
-      brine:    '1:1 apple cider vinegar to water, 1 tsp salt, 1 tsp honey.',
-      timeline: 'Ready in 2 weeks in the fridge.',
-      proTip:   'Honey-garlic ferment is its own thing and absolutely worth trying alongside.',
-    },
-  },
-  asparagus: {
-    salt: {
-      brine:    '2% salt brine (20g salt per 1L water).',
-      timeline: 'Ready in 5–10 days at room temperature.',
-      proTip:   'Trim to jar height and stand upright — they look beautiful and ferment evenly.',
-    },
-    vinegar: {
-      brine:    '1:1 white vinegar to water, 1 tbsp salt, 1 tsp sugar.',
-      timeline: 'Ready in 3–5 days in the fridge.',
-      proTip:   'Use thin asparagus spears — they pickle faster and stay crunchier than thick ones.',
-    },
-  },
-  bellPepper: {
-    salt: {
-      brine:    '2% salt brine (20g salt per 1L water).',
-      timeline: 'Ready in 5–7 days at room temperature.',
-      proTip:   'Mix colours — red, yellow, and orange together make a stunning jar.',
-    },
-    vinegar: {
-      brine:    '1:1 white vinegar to water, 1 tbsp sugar, 1 tsp salt.',
-      timeline: 'Ready in 3–5 days in the fridge.',
-      proTip:   'Roast briefly before pickling for a smoky-sweet flavour profile.',
-    },
-  },
-};
+function renderLines(text: string, keyPrefix: string) {
+  return text.split('\n').filter(l => l.trim()).map((line, i) => {
+    const key = `${keyPrefix}-${i}`;
+    if (line.startsWith('**')) {
+      const clean = line.replace(/^\*\*/, '').replace(/\*\*$/, '');
+      return <p key={key} className="font-semibold text-cosmos text-sm mb-0.5">{clean}</p>;
+    }
+    if (line.startsWith('•')) {
+      return (
+        <div key={key} className="flex items-start gap-2 text-sm text-cosmos">
+          <span className="shrink-0 mt-0.5" style={{ color: '#D4E842' }}>•</span>
+          <span>{line.slice(1).trim()}</span>
+        </div>
+      );
+    }
+    if (/^\d+\./.test(line)) {
+      const match = line.match(/^(\d+)\.\s*(.*)/s);
+      const num = match?.[1];
+      const rest = match?.[2] ?? line;
+      return (
+        <div key={key} className="flex items-start gap-2 text-sm text-cosmos">
+          <span className="shrink-0 font-semibold" style={{ minWidth: '1.2em' }}>{num}.</span>
+          <span>{rest}</span>
+        </div>
+      );
+    }
+    return <p key={key} className="text-sm text-muted italic">{line}</p>;
+  });
+}
 
 // ── Ready Made guide ─────────────────────────────────────────
 
@@ -276,47 +157,17 @@ function ReadyMadeGuide({ item }: { item: ReadyMade }) {
   );
 }
 
-// ── Guide page ───────────────────────────────────────────────
+type CustomIngredient = (typeof INGREDIENTS)[number];
 
-export default function Guide() {
-  const { slug } = useParams<{ slug: string }>();
+function GuideCustomIngredient({ ingredient }: { ingredient: CustomIngredient }) {
   const navigate = useNavigate();
-
-  const customIng = slug ? INGREDIENTS.find(i => i.id === slug) : undefined;
-  const readyMade = slug ? READY_MADE.find(i => i.id === slug)  : undefined;
-
   const [activeTab, setActiveTab] = useState<'salt' | 'vinegar'>(
-    customIng?.brineDefault ?? 'salt',
+    () => ingredient.brineDefault,
   );
 
-  useEffect(() => {
-    if (customIng) setActiveTab(customIng.brineDefault);
-  }, [slug, customIng?.brineDefault]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  if (!customIng && !readyMade) {
-    return (
-      <main className="max-w-2xl mx-auto px-4 py-16 text-center">
-        <div className="text-5xl mb-5">🫙</div>
-        <p className="text-lg text-cosmos mb-2" style={{ fontFamily: 'var(--font-display)' }}>
-          Ingredient not found
-        </p>
-        <p className="text-muted text-sm mb-6">We don't have a guide for that one yet.</p>
-        <Link
-          to="/"
-          className="inline-block px-5 py-2.5 bg-cosmos text-parchment rounded-xl text-sm font-medium hover:bg-cosmos-deep transition-colors"
-        >
-          ← Back to ingredients
-        </Link>
-      </main>
-    );
-  }
-
-  if (readyMade) return <ReadyMadeGuide item={readyMade} />;
-
-  const ingredient = customIng!;
-  const isSalt     = ingredient.brineDefault === 'salt';
-  const variants   = BRINE_VARIANTS[ingredient.id];
-  const content    = variants?.[activeTab];
+  const isSalt   = ingredient.brineDefault === 'salt';
+  const variants = BRINE_VARIANTS[ingredient.id];
+  const content  = variants?.[activeTab];
 
   return (
     <main className="max-w-2xl mx-auto px-4 py-10">
@@ -382,12 +233,28 @@ export default function Guide() {
 
       {content && (
         <>
-          {/* Brine */}
+          {/* Brine recipe card */}
           <section className="bg-white/60 border border-lavender/30 rounded-2xl p-6 mb-6">
             <h2 className="text-xl text-cosmos mb-3" style={{ fontFamily: 'var(--font-display)' }}>
               Brine
             </h2>
-            <p className="text-cosmos">{content.brine}</p>
+            <div className="space-y-1.5">{renderLines(content.brine, 'brine')}</div>
+          </section>
+
+          {/* Method */}
+          <section className="bg-white/60 border border-lavender/30 rounded-2xl p-6 mb-6">
+            <h2 className="text-xl text-cosmos mb-3" style={{ fontFamily: 'var(--font-display)' }}>
+              Method
+            </h2>
+            <div className="space-y-2">{renderLines(content.method, 'method')}</div>
+          </section>
+
+          {/* Aromatics & Ratios */}
+          <section className="bg-white/60 border border-lavender/30 rounded-2xl p-6 mb-6">
+            <h2 className="text-xl text-cosmos mb-3" style={{ fontFamily: 'var(--font-display)' }}>
+              Aromatics &amp; Ratios
+            </h2>
+            <div className="space-y-1.5">{renderLines(content.aromatics, 'aromatics')}</div>
           </section>
 
           {/* Timeline */}
@@ -415,4 +282,35 @@ export default function Guide() {
       </button>
     </main>
   );
+}
+
+// ── Guide page ───────────────────────────────────────────────
+
+export default function Guide() {
+  const { slug } = useParams<{ slug: string }>();
+
+  const customIng = slug ? INGREDIENTS.find(i => i.id === slug) : undefined;
+  const readyMade = slug ? READY_MADE.find(i => i.id === slug)  : undefined;
+
+  if (!customIng && !readyMade) {
+    return (
+      <main className="max-w-2xl mx-auto px-4 py-16 text-center">
+        <div className="text-5xl mb-5">🫙</div>
+        <p className="text-lg text-cosmos mb-2" style={{ fontFamily: 'var(--font-display)' }}>
+          Ingredient not found
+        </p>
+        <p className="text-muted text-sm mb-6">We don't have a guide for that one yet.</p>
+        <Link
+          to="/"
+          className="inline-block px-5 py-2.5 bg-cosmos text-parchment rounded-xl text-sm font-medium hover:bg-cosmos-deep transition-colors"
+        >
+          ← Back to ingredients
+        </Link>
+      </main>
+    );
+  }
+
+  if (readyMade) return <ReadyMadeGuide item={readyMade} />;
+
+  return <GuideCustomIngredient key={slug} ingredient={customIng!} />;
 }
