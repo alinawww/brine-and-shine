@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cosmos: #2A1A4E;
+  --color-cosmos-deep: #1A0F36;
+  --color-lavender: #C4A8E8;
+  --color-lime: #D4E842;
+  --color-blush: #E8A2C8;
+  --color-sage: #A8D8A8;
+  --color-parchment: #FDF4E3;
+  --color-tangerine: #F4845A;
+  --color-muted: #7A5A9E;
+
+  --font-display: "Bagel Fat One", serif;
+  --font-body: "DM Sans", system-ui, sans-serif;
+
+  --radius-card: 28px;
+}
+
+:root {
+  --bs-cosmos: #2A1A4E;
+  --bs-cosmos-deep: #1A0F36;
+  --bs-lavender: #C4A8E8;
+  --bs-lime: #D4E842;
+  --bs-blush: #E8A2C8;
+  --bs-sage: #A8D8A8;
+  --bs-parchment: #FDF4E3;
+  --bs-tangerine: #F4845A;
+  --bs-muted: #7A5A9E;
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background-color: #FDF4E3;
+    color: #2A1A4E;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-weight: 500;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6, p {
+    margin: 0;
+  }
+}
+
+/* ── Animations ────────────────────────────────────────── */
+
+@keyframes bs-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes bs-bubble-rise {
+  0%   { transform: translateY(0) scale(0.6); opacity: 0; }
+  20%  { opacity: 1; }
+  80%  { opacity: 0.6; }
+  100% { transform: translateY(-150px) scale(1.15); opacity: 0; }
+}
+
+@keyframes bs-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  33%       { transform: translateY(-10px) rotate(8deg); }
+  66%       { transform: translateY(6px) rotate(-6deg); }
+}
+
+@keyframes bs-wiggle {
+  0%   { transform: rotate(0deg) scale(1); }
+  20%  { transform: rotate(-6deg) scale(1.04); }
+  40%  { transform: rotate(6deg) scale(1.06); }
+  60%  { transform: rotate(-4deg) scale(1.04); }
+  80%  { transform: rotate(3deg) scale(1.02); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+/* ── Responsive grid ───────────────────────────────────── */
+
+@media (max-width: 1200px) {
+  .bs-grid { grid-template-columns: repeat(3, 1fr) !important; }
+}
+@media (max-width: 860px) {
+  .bs-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
