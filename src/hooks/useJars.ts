@@ -9,6 +9,8 @@ export interface Jar {
   spices: string[];
   dateStarted: string;
   status: 'draft' | 'fermenting' | 'ready' | 'eaten';
+  grams: number;
+  jarSize: string;
 }
 
 const STORAGE_KEY = 'brineandshine_jars';
@@ -16,7 +18,8 @@ const STORAGE_KEY = 'brineandshine_jars';
 function loadJars(): Jar[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as Jar[]) : [];
+    const jars = raw ? (JSON.parse(raw) as Jar[]) : [];
+    return jars.map(j => ({ grams: 800, jarSize: 'medium', ...j }));
   } catch {
     return [];
   }

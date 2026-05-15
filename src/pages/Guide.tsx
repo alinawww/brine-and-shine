@@ -274,7 +274,7 @@ function GuideCustomIngredient({ ingredient }: { ingredient: CustomIngredient })
       )}
 
       <button
-        onClick={() => navigate(`/build/${ingredient.id}`, { state: { brineType: activeTab } })}
+        onClick={() => navigate(`/build/${ingredient.id}?brine=${activeTab}`)}
         className="w-full py-3.5 bg-cosmos text-parchment font-medium rounded-2xl hover:bg-cosmos-deep transition-colors cursor-pointer text-base"
         style={{ fontFamily: 'var(--font-body)' }}
       >

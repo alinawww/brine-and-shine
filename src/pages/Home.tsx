@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BackgroundDecor } from '../components/BackgroundDecor';
-import { StepIllustration, wavySine } from '../components/TimelineIllustrations';
+import { StepIllustration } from '../components/TimelineIllustrations';
+import { wavySine } from '../components/wavySine';
 import { IngredientIcon } from '../components/IngredientIcons';
 import { useWindowWidth } from '../hooks/useWindowWidth';
 import { INGREDIENTS, READY_MADE, type GridItem } from '../data/ingredients';
