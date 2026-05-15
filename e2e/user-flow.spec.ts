@@ -21,12 +21,11 @@ test.describe('Brine & Shine — full user flow', () => {
     await expect(page.getByRole('button', { name: /surprise me/i })).toBeVisible();
 
     // Navbar links
-    await expect(page.getByRole('link', { name: 'Ingredients' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Build a Jar' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'My Jars' })).toBeVisible();
 
-    // Three dark-accent cards are present
-    for (const name of ['Cucumbers', 'Red Onion', 'Radishes']) {
+    // Three salt-brine (dark) cards are present
+    for (const name of ['Cucumbers', 'Radishes', 'Cabbage']) {
       await expect(cards.filter({ hasText: name })).toBeVisible();
     }
   });
@@ -201,8 +200,8 @@ test.describe('Brine & Shine — full user flow', () => {
     await expect(page.getByText('Red Onion')).toBeVisible();
     await expect(page.locator('span').filter({ hasText: 'Fermenting' })).toBeVisible();
 
-    // Return home via navbar
-    await page.getByRole('link', { name: 'Ingredients' }).click();
+    // Return home via logo
+    await page.locator('header a').first().click();
     await expect(page).toHaveURL('/');
     await expect(page.locator('article')).toHaveCount(12);
   });

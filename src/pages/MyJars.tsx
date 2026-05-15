@@ -12,13 +12,18 @@ export default function MyJars() {
     return (
       <main className="max-w-2xl mx-auto px-4 py-20 text-center">
         <div className="text-6xl mb-4">🫙</div>
-        <h1 className="font-display text-3xl text-near-black mb-3">No jars yet</h1>
+        <h1
+          className="text-3xl text-cosmos mb-3"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
+          No jars yet
+        </h1>
         <p className="text-muted mb-8">
           Start by picking an ingredient and building your first jar.
         </p>
         <Link
           to="/"
-          className="inline-block px-6 py-3 bg-pickle-green text-cream rounded-xl font-medium hover:bg-pickle-green-dark transition-colors"
+          className="inline-block px-6 py-3 bg-cosmos text-parchment rounded-xl font-medium hover:bg-cosmos-deep transition-colors"
         >
           Browse ingredients
         </Link>
@@ -33,10 +38,15 @@ export default function MyJars() {
   return (
     <main className="max-w-2xl mx-auto px-4 py-10">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="font-display text-4xl text-near-black">My Jars</h1>
+        <h1
+          className="text-4xl text-cosmos"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
+          My Jars
+        </h1>
         <Link
           to="/build"
-          className="px-4 py-2 bg-pickle-green text-cream text-sm font-medium rounded-full hover:bg-pickle-green-dark transition-colors"
+          className="px-4 py-2 bg-cosmos text-parchment text-sm font-medium rounded-full hover:bg-cosmos-deep transition-colors"
         >
           + New jar
         </Link>
@@ -46,14 +56,20 @@ export default function MyJars() {
         {sorted.map(jar => {
           const ingredient = ingredientsBySlug[jar.ingredient];
           return (
-            <li key={jar.id} className="bg-cream border border-mustard/20 rounded-xl p-5">
+            <li
+              key={jar.id}
+              className="bg-white/60 border border-lavender/25 rounded-2xl p-5 hover:border-lavender/50 transition-colors"
+            >
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-xl" aria-hidden="true">
                       {ingredient?.emoji ?? '🫙'}
                     </span>
-                    <h2 className="font-display text-lg text-near-black truncate">
+                    <h2
+                      className="text-lg text-cosmos truncate"
+                      style={{ fontFamily: 'var(--font-display)' }}
+                    >
                       {jar.name}
                     </h2>
                   </div>
@@ -76,7 +92,7 @@ export default function MyJars() {
                     onChange={e =>
                       updateJar(jar.id, { status: e.target.value as Jar['status'] })
                     }
-                    className="text-xs bg-parchment border border-muted/20 rounded-lg px-2 py-1 text-muted focus:outline-none"
+                    className="text-xs bg-white/80 border border-lavender/25 rounded-lg px-2 py-1 text-cosmos focus:outline-none focus:border-lavender cursor-pointer"
                   >
                     <option value="draft">Draft</option>
                     <option value="fermenting">Fermenting</option>
@@ -86,16 +102,16 @@ export default function MyJars() {
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-mustard/10 flex items-center gap-4">
+              <div className="mt-4 pt-3 border-t border-lavender/15 flex items-center gap-4">
                 <Link
                   to={`/ingredient/${jar.ingredient}`}
-                  className="text-xs text-pickle-green hover:underline"
+                  className="text-xs text-muted hover:text-cosmos transition-colors"
                 >
                   View guide →
                 </Link>
                 <Link
                   to={`/build/${jar.ingredient}`}
-                  className="text-xs text-muted hover:text-near-black transition-colors"
+                  className="text-xs text-muted hover:text-cosmos transition-colors"
                 >
                   Make another
                 </Link>
@@ -103,7 +119,7 @@ export default function MyJars() {
                   onClick={() => {
                     if (window.confirm(`Delete "${jar.name}"?`)) deleteJar(jar.id);
                   }}
-                  className="text-xs text-muted hover:text-red-600 transition-colors ml-auto"
+                  className="text-xs text-muted hover:text-tangerine transition-colors ml-auto cursor-pointer"
                 >
                   Delete
                 </button>

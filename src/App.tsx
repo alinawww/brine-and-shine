@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import { SvgDefs } from './components/SvgDefs';
 import { Navbar } from './components/Navbar';
+import { ScrollToTop } from './components/ScrollToTop';
 import Home from './pages/Home';
 import Guide from './pages/Guide';
 import Builder from './pages/Builder';
@@ -10,6 +11,7 @@ export default function App() {
   return (
     <>
       <SvgDefs />
+      <ScrollToTop />
       <Navbar />
       <Routes>
         <Route path="/"                 element={<Home />} />

@@ -73,12 +73,12 @@ function SpiceChip({
     <button
       type="button"
       onClick={onToggle}
-      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm border transition-all ${
+      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm border transition-all cursor-pointer ${
         selected
-          ? 'bg-pickle-green text-cream border-pickle-green'
+          ? 'bg-cosmos text-parchment border-cosmos'
           : highlighted
-          ? 'bg-mustard/10 text-near-black border-mustard/40 hover:border-mustard'
-          : 'bg-parchment text-near-black border-muted/30 hover:border-muted'
+          ? 'bg-lavender/20 text-cosmos border-lavender/40 hover:border-lavender'
+          : 'bg-parchment text-cosmos border-lavender/20 hover:border-lavender/60'
       }`}
     >
       <span aria-hidden="true">{spice.emoji}</span>

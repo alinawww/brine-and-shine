@@ -1,6 +1,8 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ingredientsBySlug } from '../data/ingredients';
 import { spicesBySlug } from '../data/spices';
+import { homeIngredientsBySlug } from '../data/homeIngredients';
+import { IngredientIcon } from '../components/IngredientIcons';
 
 export default function Guide() {
   const { slug } = useParams<{ slug: string }>();
@@ -10,8 +12,15 @@ export default function Guide() {
   if (!ingredient) {
     return (
       <main className="max-w-2xl mx-auto px-4 py-16 text-center">
-        <p className="text-muted text-lg">Ingredient not found.</p>
-        <Link to="/" className="mt-4 inline-block text-pickle-green hover:underline">
+        <div className="text-5xl mb-5">🫙</div>
+        <p className="text-lg text-cosmos mb-2" style={{ fontFamily: 'var(--font-display)' }}>
+          Ingredient not found
+        </p>
+        <p className="text-muted text-sm mb-6">We don't have a guide for that one yet.</p>
+        <Link
+          to="/"
+          className="inline-block px-5 py-2.5 bg-cosmos text-parchment rounded-xl text-sm font-medium hover:bg-cosmos-deep transition-colors"
+        >
           ← Back to ingredients
         </Link>
       </main>
@@ -19,24 +28,49 @@ export default function Guide() {
   }
 
   const { recommendedBrine } = ingredient;
+  const homeIng = slug ? homeIngredientsBySlug[slug] : undefined;
+  const isSalt = homeIng?.brineDefault === 'salt';
 
   return (
     <main className="max-w-2xl mx-auto px-4 py-10">
-      <Link to="/" className="text-sm text-muted hover:text-near-black transition-colors">
+      <Link to="/" className="text-sm text-muted hover:text-cosmos transition-colors">
         ← All ingredients
       </Link>
 
       {/* Hero */}
       <div className="mt-6 mb-8">
-        <div className="text-6xl mb-4">{ingredient.emoji}</div>
-        <h1 className="font-display text-4xl text-near-black">{ingredient.name}</h1>
+        <div style={{
+          width: 160, height: 160,
+          borderRadius: 24,
+          background: isSalt ? '#2A1A4E' : 'rgba(42,26,78,0.04)',
+          border: isSalt ? 'none' : '1.5px solid rgba(42,26,78,0.10)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          marginBottom: 24,
+          position: 'relative', overflow: 'visible',
+        }}>
+          {homeIng
+            ? <IngredientIcon name={homeIng.id} color={isSalt ? '#FDF4E3' : '#2A1A4E'} size={120} />
+            : <span style={{ fontSize: 64 }}>{ingredient.emoji}</span>
+          }
+        </div>
+        <h1
+          className="text-4xl text-cosmos"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
+          {ingredient.name}
+        </h1>
         <p className="mt-3 text-lg text-muted leading-relaxed">{ingredient.intro}</p>
       </div>
 
       {/* Brine card */}
-      <section className="bg-cream border border-mustard/30 rounded-xl p-6 mb-6">
-        <h2 className="font-display text-xl text-pickle-green mb-1">Recommended Brine</h2>
-        <p className="font-semibold text-near-black mb-5">{recommendedBrine.name}</p>
+      <section className="bg-white/60 border border-lavender/30 rounded-2xl p-6 mb-6">
+        <h2
+          className="text-xl text-cosmos mb-1"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
+          Recommended Brine
+        </h2>
+        <p className="font-semibold text-cosmos mb-5">{recommendedBrine.name}</p>
 
         <div className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
           <Field label="Vinegar"  value={recommendedBrine.vinegar} />
@@ -48,7 +82,7 @@ export default function Guide() {
         </div>
 
         {recommendedBrine.notes && (
-          <p className="mt-5 text-sm text-muted italic border-t border-mustard/20 pt-4">
+          <p className="mt-5 text-sm text-muted italic border-t border-lavender/20 pt-4">
             {recommendedBrine.notes}
           </p>
         )}
@@ -58,7 +92,12 @@ export default function Guide() {
 
       {/* Suggested spices */}
       <section className="mb-6">
-        <h2 className="font-display text-xl text-near-black mb-3">Suggested Spices</h2>
+        <h2
+          className="text-xl text-cosmos mb-3"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
+          Suggested Spices
+        </h2>
         <div className="flex flex-wrap gap-2">
           {ingredient.suggestedSpices.map(spiceSlug => {
             const spice = spicesBySlug[spiceSlug];
@@ -66,7 +105,7 @@ export default function Guide() {
             return (
               <span
                 key={spiceSlug}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-cream border border-mustard/30 rounded-full text-sm text-near-black"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-lavender/20 border border-lavender/40 rounded-full text-sm text-cosmos"
               >
                 <span aria-hidden="true">{spice.emoji}</span>
                 {spice.name}
@@ -78,23 +117,33 @@ export default function Guide() {
 
       {/* Timeline */}
       <section className="mb-6">
-        <h2 className="font-display text-xl text-near-black mb-2">Timeline</h2>
+        <h2
+          className="text-xl text-cosmos mb-2"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
+          Timeline
+        </h2>
         <p className="text-muted leading-relaxed">{ingredient.timeline}</p>
       </section>
 
       {/* Pro tip */}
-      <section className="bg-mustard/10 border-l-4 border-mustard rounded-r-xl px-5 py-4 mb-6">
-        <p className="text-sm font-semibold text-near-black mb-1">Pro Tip</p>
-        <p className="text-sm text-near-black leading-relaxed">{ingredient.proTip}</p>
+      <section className="bg-tangerine/10 border-l-4 border-tangerine rounded-r-2xl px-5 py-4 mb-6">
+        <p className="text-sm font-semibold text-cosmos mb-1">Pro Tip</p>
+        <p className="text-sm text-cosmos leading-relaxed">{ingredient.proTip}</p>
       </section>
 
       {/* Health benefits */}
       <section className="mb-10">
-        <h2 className="font-display text-xl text-near-black mb-3">Health Benefits</h2>
+        <h2
+          className="text-xl text-cosmos mb-3"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
+          Health Benefits
+        </h2>
         <ul className="space-y-2">
           {ingredient.healthBenefits.map(benefit => (
             <li key={benefit} className="flex items-start gap-2 text-sm text-muted">
-              <span className="text-pickle-green shrink-0 mt-0.5">✓</span>
+              <span className="text-sage shrink-0 mt-0.5">✓</span>
               {benefit}
             </li>
           ))}
@@ -104,7 +153,8 @@ export default function Guide() {
       {/* CTA */}
       <button
         onClick={() => navigate(`/build/${ingredient.slug}`)}
-        className="w-full py-3 bg-pickle-green text-cream font-medium rounded-xl hover:bg-pickle-green-dark transition-colors"
+        className="w-full py-3.5 bg-cosmos text-parchment font-medium rounded-2xl hover:bg-cosmos-deep transition-colors cursor-pointer text-base"
+        style={{ fontFamily: 'var(--font-body)' }}
       >
         Start a jar of {ingredient.name} →
       </button>
@@ -118,7 +168,7 @@ function Field({ label, value }: { label: string; value: string }) {
       <span className="block text-xs font-medium text-muted uppercase tracking-wider mb-0.5">
         {label}
       </span>
-      <span className="text-near-black">{value}</span>
+      <span className="text-cosmos">{value}</span>
     </div>
   );
 }

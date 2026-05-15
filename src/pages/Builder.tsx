@@ -46,16 +46,21 @@ export default function Builder() {
 
   return (
     <main className="max-w-2xl mx-auto px-4 py-10">
-      <Link to={backHref} className="text-sm text-muted hover:text-near-black transition-colors">
+      <Link to={backHref} className="text-sm text-muted hover:text-cosmos transition-colors">
         ← {backLabel}
       </Link>
 
-      <h1 className="font-display text-4xl text-near-black mt-5 mb-8">Build a Jar</h1>
+      <h1
+        className="text-4xl text-cosmos mt-5 mb-8"
+        style={{ fontFamily: 'var(--font-display)' }}
+      >
+        Build a Jar
+      </h1>
 
       <form onSubmit={handleSubmit} className="space-y-7">
         {/* Jar name */}
         <div>
-          <label className="block text-sm font-medium text-near-black mb-1.5">
+          <label className="block text-sm font-medium text-cosmos mb-1.5">
             Jar name{' '}
             <span className="font-normal text-muted">(your label for this batch)</span>
           </label>
@@ -65,13 +70,13 @@ export default function Builder() {
             onChange={e => setName(e.target.value)}
             placeholder="e.g. Spicy dills for the holidays"
             required
-            className="w-full px-4 py-2.5 bg-cream border border-muted/30 rounded-xl text-near-black placeholder:text-muted/50 focus:outline-none focus:border-pickle-green transition-colors"
+            className="w-full px-4 py-2.5 bg-white/60 border border-lavender/30 rounded-xl text-cosmos placeholder:text-muted/50 focus:outline-none focus:border-lavender transition-colors"
           />
         </div>
 
         {/* Ingredient */}
         <div>
-          <label className="block text-sm font-medium text-near-black mb-1.5">
+          <label className="block text-sm font-medium text-cosmos mb-1.5">
             Ingredient
           </label>
           <select
@@ -82,7 +87,7 @@ export default function Builder() {
               if (ing) setSelectedSpices(ing.suggestedSpices.slice(0, 3));
             }}
             required
-            className="w-full px-4 py-2.5 bg-cream border border-muted/30 rounded-xl text-near-black focus:outline-none focus:border-pickle-green transition-colors appearance-none"
+            className="w-full px-4 py-2.5 bg-white/60 border border-lavender/30 rounded-xl text-cosmos focus:outline-none focus:border-lavender transition-colors appearance-none"
           >
             <option value="">Select an ingredient…</option>
             {ingredients.map(ing => (
@@ -95,7 +100,7 @@ export default function Builder() {
 
         {/* Brine type */}
         <div>
-          <label className="block text-sm font-medium text-near-black mb-1.5">
+          <label className="block text-sm font-medium text-cosmos mb-1.5">
             Brine type
           </label>
           <div className="flex gap-3">
@@ -104,10 +109,10 @@ export default function Builder() {
                 key={type}
                 type="button"
                 onClick={() => setBrineType(type)}
-                className={`flex-1 py-2.5 rounded-xl border text-sm font-medium transition-all ${
+                className={`flex-1 py-2.5 rounded-xl border text-sm font-medium transition-all cursor-pointer ${
                   brineType === type
-                    ? 'bg-pickle-green text-cream border-pickle-green'
-                    : 'bg-cream text-near-black border-muted/30 hover:border-muted'
+                    ? 'bg-cosmos text-parchment border-cosmos'
+                    : 'bg-white/60 text-cosmos border-lavender/30 hover:border-lavender'
                 }`}
               >
                 {type === 'vinegar' ? '🍶 Vinegar brine' : '🧂 Salt ferment'}
@@ -118,7 +123,7 @@ export default function Builder() {
 
         {/* Spices */}
         <div>
-          <label className="block text-sm font-medium text-near-black mb-2">
+          <label className="block text-sm font-medium text-cosmos mb-2">
             Spices
           </label>
           <SpiceSelector
@@ -130,21 +135,22 @@ export default function Builder() {
 
         {/* Date started */}
         <div>
-          <label className="block text-sm font-medium text-near-black mb-1.5">
+          <label className="block text-sm font-medium text-cosmos mb-1.5">
             Date started
           </label>
           <input
             type="date"
             value={dateStarted}
             onChange={e => setDateStarted(e.target.value)}
-            className="px-4 py-2.5 bg-cream border border-muted/30 rounded-xl text-near-black focus:outline-none focus:border-pickle-green transition-colors"
+            className="px-4 py-2.5 bg-white/60 border border-lavender/30 rounded-xl text-cosmos focus:outline-none focus:border-lavender transition-colors"
           />
         </div>
 
         <button
           type="submit"
           disabled={!name.trim() || !ingredient}
-          className="w-full py-3 bg-pickle-green text-cream font-medium rounded-xl hover:bg-pickle-green-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full py-3.5 bg-cosmos text-parchment font-medium rounded-2xl hover:bg-cosmos-deep transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer text-base"
+          style={{ fontFamily: 'var(--font-body)' }}
         >
           Save jar 🫙
         </button>

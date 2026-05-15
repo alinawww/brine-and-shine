@@ -2,30 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BackgroundDecor } from '../components/BackgroundDecor';
 import { IngredientIcon } from '../components/IngredientIcons';
-
-interface IngredientDef {
-  id: string;    // icon key → IngredientIcon name
-  slug: string;  // data slug → /ingredient/:slug route
-  name: string;
-  desc: string;
-  tags: [string, string];
-  accent?: boolean;
-}
-
-const INGREDIENTS: IngredientDef[] = [
-  { id: 'cucumber',    slug: 'cucumbers',    name: 'Cucumbers',    desc: 'The undisputed king of the pickle jar. Crisp, cooling, infinitely customizable.',          tags: ['classic',  '3-7 days'],   accent: true },
-  { id: 'carrot',      slug: 'carrots',      name: 'Carrots',      desc: 'Pickled carrots stay satisfyingly crunchy and turn sweet-sour in a few days.',              tags: ['crunchy',  '5-10 days'] },
-  { id: 'jalapeno',    slug: 'jalapenos',    name: 'Jalapeños',    desc: 'Mellows the heat just enough — you keep the personality without the punch.',                tags: ['spicy',    '2-4 days'] },
-  { id: 'redOnion',    slug: 'red-onion',    name: 'Red Onion',    desc: 'Quick-pickled red onions are a fridge staple. They turn a brilliant magenta.',               tags: ['fast',     '1 hour'],    accent: true },
-  { id: 'beet',        slug: 'beets',        name: 'Beets',        desc: 'Earthy, sweet, and a deep jewel-red that stains everything in the best way.',                tags: ['earthy',   '7-14 days'] },
-  { id: 'greenBean',   slug: 'green-beans',  name: 'Green Beans',  desc: '"Dilly beans" — the snappy, garlicky pickle that disappears fastest at parties.',           tags: ['snappy',   '5-7 days'] },
-  { id: 'cauliflower', slug: 'cauliflower',  name: 'Cauliflower',  desc: 'Porous florets soak up brine like a sponge. The crunch holds for weeks.',                   tags: ['sponge',   '7-14 days'] },
-  { id: 'radish',      slug: 'radishes',     name: 'Radishes',     desc: 'Transforms dramatically — peppery raw becomes mellow, tangy, a little sweet.',               tags: ['peppery',  '3-5 days'],  accent: true },
-  { id: 'cabbage',     slug: 'cabbage',      name: 'Cabbage',      desc: 'The soul of fermented pickling tradition. Sauerkraut, kimchi, curtido — all start here.',    tags: ['ferment',  '7-21 days'] },
-  { id: 'garlic',      slug: 'garlic',       name: 'Garlic',       desc: 'Mellows from sharp and pungent into something nutty and buttery. Patience required.',         tags: ['nutty',    '30+ days'] },
-  { id: 'asparagus',   slug: 'asparagus',    name: 'Asparagus',    desc: 'Elegant, crunchy spears that make any bloody mary look like it came from a magazine.',        tags: ['elegant',  '5-10 days'] },
-  { id: 'bellPepper',  slug: 'bell-peppers', name: 'Bell Peppers', desc: 'Sweet, tangy, vibrantly colored. Great on sandwiches, in salads, straight from the jar.',    tags: ['sweet',    '5-7 days'] },
-];
+import { useWindowWidth } from '../hooks/useWindowWidth';
+import { HOME_INGREDIENTS, type HomeIngredient } from '../data/homeIngredients';
 
 // ── Bubble field ────────────────────────────────────────────
 
@@ -66,14 +44,16 @@ function IngredientCard({
   index,
   isSelected,
   onNavigate,
+  isMobile,
 }: {
-  ingredient: IngredientDef;
+  ingredient: HomeIngredient;
   index: number;
   isSelected: boolean;
   onNavigate: (slug: string) => void;
+  isMobile: boolean;
 }) {
   const [hover, setHover] = useState(false);
-  const dark = !!ingredient.accent;
+  const dark = ingredient.brineDefault === 'salt';
   const baseRotate = ((index * 73) % 5) - 2.5;
   const rotate     = hover ? baseRotate * 0.3 : baseRotate * 0.5;
 
@@ -84,8 +64,8 @@ function IngredientCard({
       onMouseLeave={() => setHover(false)}
       style={{
         background:   dark ? '#2A1A4E' : '#FDF4E3',
-        borderRadius: 28,
-        padding:      22,
+        borderRadius: isMobile ? 20 : 28,
+        padding:      isMobile ? 16 : 22,
         cursor:       'pointer',
         transform:    `rotate(${rotate}deg)${isSelected ? ' scale(1.04)' : ''}${hover ? ' translateY(-6px)' : ''}`,
         transition:   'all 280ms cubic-bezier(0.34,1.56,0.64,1)',
@@ -124,7 +104,7 @@ function IngredientCard({
       {/* Name */}
       <h3
         style={{
-          fontFamily: 'var(--font-display)', fontSize: 26,
+          fontFamily: 'var(--font-display)', fontSize: isMobile ? 20 : 26,
           color:      dark ? '#FDF4E3' : '#2A1A4E',
           margin:     '0 0 8px', lineHeight: 1,
         }}
@@ -135,9 +115,9 @@ function IngredientCard({
       {/* Description */}
       <p
         style={{
-          fontFamily: 'var(--font-body)', fontSize: 13.5,
+          fontFamily: 'var(--font-body)', fontSize: isMobile ? 12 : 13.5,
           color:      dark ? 'rgba(253,244,227,0.78)' : 'rgba(42,26,78,0.78)',
-          lineHeight: 1.45, margin: '0 0 12px', minHeight: 58,
+          lineHeight: 1.45, margin: '0 0 12px', minHeight: isMobile ? 44 : 58,
         }}
       >
         {ingredient.desc}
@@ -150,9 +130,9 @@ function IngredientCard({
             key={tag}
             style={{
               fontFamily:    'var(--font-body)',
-              fontSize:      10, fontWeight: 700,
+              fontSize:      isMobile ? 9 : 10, fontWeight: 700,
               textTransform: 'uppercase', letterSpacing: '0.08em',
-              padding:       '4px 10px', borderRadius: 999,
+              padding:       isMobile ? '3px 8px' : '4px 10px', borderRadius: 999,
               background:    i === 0
                 ? '#D4E842'
                 : dark ? 'rgba(253,244,227,0.12)' : 'rgba(122,90,158,0.12)',
@@ -198,9 +178,16 @@ function IngredientCard({
 export default function Home() {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<string | null>(null);
+  const [brineFilter, setBrineFilter] = useState<'salt' | 'vinegar' | null>(null);
+  const isMobile = useWindowWidth() < 768;
+
+  const visibleIngredients = brineFilter
+    ? HOME_INGREDIENTS.filter(ing => ing.brineDefault === brineFilter)
+    : HOME_INGREDIENTS;
 
   const onSurprise = () => {
-    const pick = INGREDIENTS[Math.floor(Math.random() * INGREDIENTS.length)];
+    const pool = visibleIngredients;
+    const pick = pool[Math.floor(Math.random() * pool.length)];
     setSelected(pick.id);
     setTimeout(() => {
       setSelected(null);
@@ -214,10 +201,10 @@ export default function Home() {
     <div style={{ position: 'relative', minHeight: '100vh' }}>
       <BackgroundDecor />
 
-      <div style={{ position: 'relative', zIndex: 1, maxWidth: 1440, margin: '0 auto', padding: '96px 56px 80px' }}>
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: 1440, margin: '0 auto', padding: isMobile ? '60px 20px 60px' : '96px 56px 80px' }}>
 
         {/* ── Hero ── */}
-        <section style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 40, marginBottom: 60, alignItems: 'start' }}>
+        <section style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.5fr 1fr', gap: 40, marginBottom: 60, alignItems: 'start' }}>
 
           {/* Left copy */}
           <div>
@@ -237,7 +224,7 @@ export default function Home() {
             </p>
             <h1 style={{
               fontFamily:    'var(--font-display)',
-              fontSize:      'clamp(64px, 9vw, 132px)',
+              fontSize:      isMobile ? 'clamp(48px, 12vw, 132px)' : 'clamp(64px, 9vw, 132px)',
               lineHeight:    0.95, letterSpacing: '0.005em',
               color:         '#2A1A4E', margin: '0 0 24px',
             }}>
@@ -256,7 +243,7 @@ export default function Home() {
           </div>
 
           {/* Right: button + stats */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24, paddingTop: 20 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24, paddingTop: 20, width: isMobile ? '100%' : 'fit-content' }}>
             <button
               onClick={onSurprise}
               style={{
@@ -268,7 +255,6 @@ export default function Home() {
                 color: '#2A1A4E',
                 boxShadow: '0 6px 0 0 #2A1A4E, 0 12px 24px rgba(42,26,78,0.18)',
                 transition: 'all 180ms ease',
-                alignSelf: 'flex-start',
               }}
               onMouseEnter={e => {
                 e.currentTarget.style.transform  = 'translateY(-2px) rotate(-2deg)';
@@ -311,17 +297,16 @@ export default function Home() {
             {/* Stats pill */}
             <div style={{
               display: 'flex', gap: 24,
-              padding: '18px 24px', borderRadius: 18,
+              padding: isMobile ? '12px 16px' : '18px 24px', borderRadius: 18,
               border: '1px dashed rgba(196,168,232,0.4)',
               background: 'rgba(42,26,78,0.04)',
-              justifyContent: 'flex-end',
+              justifyContent: isMobile ? 'flex-start' : 'flex-end',
             }}>
               {[
                 { n: '12', label: 'ingredients' },
                 { n: '38', label: 'recipes' },
-                { n: '∞',  label: 'fermenting friends' },
               ].map(({ n, label }) => (
-                <div key={label} style={{ textAlign: 'right' }}>
+                <div key={label} style={{ textAlign: isMobile ? 'left' : 'right' }}>
                   <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: '#2A1A4E', lineHeight: 1 }}>{n}</div>
                   <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.10em', color: '#7A5A9E' }}>{label}</div>
                 </div>
@@ -331,7 +316,13 @@ export default function Home() {
         </section>
 
         {/* ── Section header ── */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20, paddingTop: 40, marginBottom: 24 }}>
+        <div style={{
+          display: 'flex',
+          flexDirection: isMobile ? 'column' : 'row',
+          alignItems: isMobile ? 'flex-start' : 'center',
+          gap: isMobile ? 8 : 20,
+          paddingTop: 40, marginBottom: 24,
+        }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <span style={{ fontSize: 40 }}>🍄</span>
             <div>
@@ -339,33 +330,60 @@ export default function Home() {
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 42, color: '#2A1A4E', margin: 0, lineHeight: 1 }}>Vegetables</h2>
             </div>
           </div>
-          <svg width="260" height="20" viewBox="0 0 260 20" fill="none" aria-hidden="true" style={{ flex: 1, maxWidth: 260 }}>
-            <path d="M0 10 Q32 2 65 10 Q98 18 130 10 Q162 2 195 10 Q228 18 260 10" stroke="#C4A8E8" strokeWidth="2" />
-          </svg>
-          <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
-            <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 700, padding: '6px 14px', borderRadius: 999, background: 'rgba(196,168,232,0.3)', color: '#2A1A4E' }}>
-              {INGREDIENTS.length} options
-            </span>
-            <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 700, padding: '6px 14px', borderRadius: 999, background: '#2A1A4E', color: '#A8D8A8' }}>
-              ● all in season
-            </span>
+          {!isMobile && (
+            <svg width="260" height="20" viewBox="0 0 260 20" fill="none" aria-hidden="true" style={{ flex: 1, maxWidth: 260 }}>
+              <path d="M0 10 Q32 2 65 10 Q98 18 130 10 Q162 2 195 10 Q228 18 260 10" stroke="#C4A8E8" strokeWidth="2" />
+            </svg>
+          )}
+          <div style={{ display: 'flex', gap: 8, marginLeft: isMobile ? 0 : 'auto' }}>
+            <button
+              onClick={() => setBrineFilter(f => f === 'salt' ? null : 'salt')}
+              style={{
+                fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 700,
+                textTransform: 'uppercase', letterSpacing: '0.10em',
+                padding: '6px 14px', borderRadius: 999, border: 'none',
+                background: '#2A1A4E', color: '#FDF4E3',
+                cursor: 'pointer', transition: 'opacity 180ms ease',
+                opacity: brineFilter === 'vinegar' ? 0.35 : 1,
+              }}
+            >
+              ● Salt Brine
+            </button>
+            <button
+              onClick={() => setBrineFilter(f => f === 'vinegar' ? null : 'vinegar')}
+              style={{
+                fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 700,
+                textTransform: 'uppercase', letterSpacing: '0.10em',
+                padding: '6px 14px', borderRadius: 999,
+                background: '#FDF4E3', color: '#2A1A4E',
+                border: '1.5px solid rgba(42,26,78,0.15)',
+                cursor: 'pointer', transition: 'opacity 180ms ease',
+                opacity: brineFilter === 'salt' ? 0.35 : 1,
+              }}
+            >
+              ● Vinegar Brine
+            </button>
           </div>
         </div>
 
         {/* ── Grid ── */}
         <section
           className="bs-grid"
-          style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 22 }}
+          style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: isMobile ? 14 : 22 }}
         >
-          {INGREDIENTS.map((ing, i) => (
-            <IngredientCard
-              key={ing.id}
-              ingredient={ing}
-              index={i}
-              isSelected={selected === ing.id}
-              onNavigate={onNavigate}
-            />
-          ))}
+          {HOME_INGREDIENTS
+            .map((ing, i) => ({ ing, i }))
+            .filter(({ ing }) => !brineFilter || ing.brineDefault === brineFilter)
+            .map(({ ing, i }) => (
+              <IngredientCard
+                key={ing.id}
+                ingredient={ing}
+                index={i}
+                isSelected={selected === ing.id}
+                onNavigate={onNavigate}
+                isMobile={isMobile}
+              />
+            ))}
         </section>
 
         {/* ── Footer ── */}
