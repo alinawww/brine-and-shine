@@ -5,6 +5,7 @@ export interface Jar {
   id: string;
   name: string;
   ingredient: string;
+  additionalIngredients: string[];
   brineType: 'salt' | 'vinegar';
   spices: string[];
   dateStarted: string;
@@ -19,7 +20,7 @@ function loadJars(): Jar[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     const jars = raw ? (JSON.parse(raw) as Partial<Jar>[]) : [];
-    return jars.map(j => ({ grams: 800, jarSize: 'medium', ...j } as Jar));
+    return jars.map(j => ({ grams: 800, jarSize: 'medium', additionalIngredients: [], ...j } as Jar));
   } catch {
     return [];
   }

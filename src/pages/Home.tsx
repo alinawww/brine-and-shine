@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { BackgroundDecor } from '../components/BackgroundDecor';
 import { StepIllustration } from '../components/TimelineIllustrations';
 import { wavySine } from '../components/wavySine';
 import { IngredientIcon } from '../components/IngredientIcons';
 import { useWindowWidth } from '../hooks/useWindowWidth';
+import { useJars } from '../hooks/useJars';
 import { INGREDIENTS, READY_MADE, type GridItem } from '../data/ingredients';
 
 // ── Helpers ─────────────────────────────────────────────────
@@ -362,6 +363,8 @@ export default function Home() {
   const [sort,        setSort]        = useState<SortKey>('az');
   const [brineFilter, setBrineFilter] = useState<'salt' | 'vinegar' | 'readymade' | null>(null);
   const isMobile = useWindowWidth() < 768;
+  const { jars } = useJars();
+  const activeJars = jars.filter(j => j.status === 'fermenting' || j.status === 'draft').length;
 
   const filteredItems = brineFilter
     ? ALL_ITEMS.filter(item =>
@@ -404,19 +407,6 @@ export default function Home() {
           gap: 40, marginBottom: 60, alignItems: 'start',
         }}>
           <div>
-            <p style={{
-              fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 700,
-              textTransform: 'uppercase', letterSpacing: '0.18em',
-              color: '#7A5A9E', marginBottom: 16,
-              display: 'flex', alignItems: 'center', gap: 8,
-            }}>
-              <span style={{
-                width: 8, height: 8, borderRadius: '50%',
-                background: '#D4E842', boxShadow: '0 0 0 3px rgba(212,232,66,0.3)',
-                display: 'inline-block', flexShrink: 0,
-              }} />
-              step one · pick your produce
-            </p>
             <h1 style={{
               fontFamily: 'var(--font-display)',
               fontSize: isMobile ? 'clamp(48px, 12vw, 132px)' : 'clamp(64px, 9vw, 132px)',
@@ -488,13 +478,29 @@ export default function Home() {
               border: '1px dashed rgba(196,168,232,0.4)',
               background: 'rgba(42,26,78,0.04)',
               justifyContent: isMobile ? 'flex-start' : 'flex-end',
+              alignItems: 'center'
             }}>
-              {[{ n: '24', label: 'pickles' }, { n: '12', label: 'classic' }].map(({ n, label }) => (
-                <div key={label} style={{ textAlign: isMobile ? 'left' : 'right' }}>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: '#2A1A4E', lineHeight: 1 }}>{n}</div>
-                  <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.10em', color: '#7A5A9E' }}>{label}</div>
-                </div>
-              ))}
+              <div style={{ textAlign: isMobile ? 'left' : 'right' }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: '#2A1A4E', lineHeight: 1 }}>{INGREDIENTS.length}</div>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.10em', color: '#7A5A9E' }}>pickles</div>
+              </div>
+              <div style={{ textAlign: isMobile ? 'left' : 'right' }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: '#2A1A4E', lineHeight: 1 }}>{READY_MADE.length}</div>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.10em', color: '#7A5A9E' }}>classics</div>
+              </div>
+              <div style={{ textAlign: isMobile ? 'left' : 'right' }}>
+                <Link to="/jars" style={{ textDecoration: 'none', display: 'inline-block' }}>
+                  <div style={{
+                    background: '#D4E842', borderRadius: 10,
+                    padding: '8px 12px', textAlign: 'center',
+                  }}>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: '#2A1A4E', lineHeight: 1 }}>{activeJars}</div>
+                    <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.10em', color: '#2A1A4E' }}>
+                      {activeJars === 1 ? 'Jar' : 'Jars'}
+                    </div>
+                  </div>
+                </Link>
+              </div>
             </div>
           </div>
         </section>
@@ -512,7 +518,19 @@ export default function Home() {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div>
-              <p style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#7A5A9E', margin: 0 }}>Browse</p>
+              <p style={{
+                fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700,
+                textTransform: 'uppercase', letterSpacing: '0.18em',
+                color: '#7A5A9E', margin: '0 0 4px',
+                display: 'flex', alignItems: 'center', gap: 6,
+              }}>
+                <span style={{
+                  width: 7, height: 7, borderRadius: '50%',
+                  background: '#D4E842', boxShadow: '0 0 0 2px rgba(212,232,66,0.3)',
+                  display: 'inline-block', flexShrink: 0,
+                }} />
+                step one · pick your produce
+              </p>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 42, color: '#2A1A4E', margin: 0, lineHeight: 1 }}>All Pickles</h2>
             </div>
           </div>

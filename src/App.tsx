@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import Guide from './pages/Guide';
 import Builder from './pages/Builder';
 import MyJars from './pages/MyJars';
+import JarDetail from './pages/JarDetail';
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
         <Route path="/build"            element={<Builder />} />
         <Route path="/build/:slug"      element={<Builder />} />
         <Route path="/jars"             element={<MyJars />} />
+        <Route path="/jars/:id"         element={<JarDetail />} />
       </Routes>
     </>
   );

@@ -68,11 +68,34 @@ export default function MyJars() {
       <ul className="space-y-3">
         {sorted.map(jar => {
           const ingredient = ingredientsBySlug[jar.ingredient];
+          const isDraft = jar.status === 'draft';
           return (
             <li
               key={jar.id}
-              className="bg-white/60 border border-lavender/25 rounded-2xl p-5 hover:border-lavender/50 transition-colors"
+              style={{
+                position: 'relative',
+                background: 'rgba(255,255,255,0.6)',
+                border: isDraft
+                  ? '1.5px dashed rgba(196,168,232,0.5)'
+                  : '1px solid rgba(196,168,232,0.25)',
+                borderRadius: 16,
+                padding: 20,
+                opacity: isDraft ? 0.75 : 1,
+                transition: 'opacity 200ms ease',
+              }}
             >
+              {isDraft && (
+                <div style={{
+                  position: 'absolute', top: 12, right: 12,
+                  background: '#F4845A', color: '#FDF4E3',
+                  fontFamily: 'var(--font-body)', fontSize: 9, fontWeight: 700,
+                  textTransform: 'uppercase', letterSpacing: '0.10em',
+                  padding: '3px 8px', borderRadius: 999,
+                }}>
+                  Draft
+                </div>
+              )}
+
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 mb-1">
@@ -98,7 +121,7 @@ export default function MyJars() {
                   )}
                 </div>
 
-                <div className="flex flex-col items-end gap-2 shrink-0">
+                <div className="flex flex-col items-end gap-2 shrink-0" style={{ paddingTop: isDraft ? 20 : 0 }}>
                   <StatusBadge status={jar.status} />
                   <select
                     value={jar.status}
@@ -115,19 +138,44 @@ export default function MyJars() {
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-lavender/15 flex items-center gap-4">
-                <Link
-                  to={`/ingredient/${jar.ingredient}`}
-                  className="text-xs text-muted hover:text-cosmos transition-colors"
-                >
-                  View guide →
-                </Link>
-                <Link
-                  to={`/build/${jar.ingredient}`}
-                  className="text-xs text-muted hover:text-cosmos transition-colors"
-                >
-                  Make another
-                </Link>
+              <div
+                className="mt-4 pt-3 flex items-center gap-4"
+                style={{ borderTop: '1px solid rgba(196,168,232,0.15)' }}
+              >
+                {isDraft ? (
+                  <Link
+                    to={`/build/${jar.ingredient}`}
+                    style={{
+                      fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 700,
+                      color: '#2A1A4E', textDecoration: 'none',
+                    }}
+                  >
+                    Finish setting up →
+                  </Link>
+                ) : (
+                  <>
+                    <Link
+                      to={`/jars/${jar.id}`}
+                      className="text-xs font-bold text-cosmos hover:text-cosmos-deep transition-colors"
+                    >
+                      View details →
+                    </Link>
+                    <Link
+                      to={`/ingredient/${jar.ingredient}`}
+                      className="text-xs text-muted hover:text-cosmos transition-colors"
+                    >
+                      View guide →
+                    </Link>
+                  </>
+                )}
+                {!isDraft && (
+                  <Link
+                    to={`/build/${jar.ingredient}`}
+                    className="text-xs text-muted hover:text-cosmos transition-colors"
+                  >
+                    Make another
+                  </Link>
+                )}
                 <button
                   onClick={() => {
                     if (window.confirm(`Delete "${jar.name}"?`)) deleteJar(jar.id);

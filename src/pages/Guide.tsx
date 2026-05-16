@@ -4,6 +4,50 @@ import { INGREDIENTS, READY_MADE, type ReadyMade } from '../data/ingredients';
 import { IngredientIcon } from '../components/IngredientIcons';
 import { BRINE_VARIANTS } from '../data/brineVariants';
 
+// ── Pro Tip Card ──────────────────────────────────────────────
+
+function ProTipCard({ text }: { text: string }) {
+  const [hover, setHover] = useState(false);
+  return (
+    <section
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        position: 'relative',
+        transform: hover ? 'rotate(-0.5deg)' : 'rotate(-1.5deg)',
+        background: '#D4E842',
+        borderRadius: 16,
+        padding: '20px 24px',
+        boxShadow: '3px 4px 0 #2A1A4E',
+        margin: '8px 12px 24px',
+        transition: 'transform 200ms ease',
+      }}
+    >
+      <svg
+        width="20" height="28" viewBox="0 0 20 28" fill="none"
+        style={{ position: 'absolute', top: -10, right: 16 }}
+        aria-hidden="true"
+      >
+        <circle cx="10" cy="10" r="7" fill="#2A1A4E"/>
+        <circle cx="10" cy="10" r="4" fill="#FDF4E3"/>
+        <line x1="10" y1="17" x2="10" y2="28" stroke="#2A1A4E" strokeWidth="2.5" strokeLinecap="round"/>
+      </svg>
+      <p style={{
+        fontFamily: 'var(--font-display)', fontSize: 16, color: '#2A1A4E',
+        marginBottom: 8,
+      }}>
+        💡 Pro Tip
+      </p>
+      <p style={{
+        fontFamily: 'var(--font-body)', fontSize: 14, fontWeight: 600,
+        color: '#2A1A4E', lineHeight: 1.5, margin: 0,
+      }}>
+        {text}
+      </p>
+    </section>
+  );
+}
+
 // ── Line renderer ─────────────────────────────────────────────
 
 function renderLines(text: string, keyPrefix: string) {
@@ -126,10 +170,7 @@ function ReadyMadeGuide({ item }: { item: ReadyMade }) {
       </section>
 
       {/* Pro tip */}
-      <section className="bg-tangerine/10 border-l-4 border-tangerine rounded-r-2xl px-5 py-4 mb-6">
-        <p className="text-sm font-semibold text-cosmos mb-1">Pro Tip</p>
-        <p className="text-sm text-cosmos leading-relaxed">{item.proTip}</p>
-      </section>
+      <ProTipCard text={item.proTip} />
 
       {/* Health benefits */}
       <section className="mb-10">
@@ -266,10 +307,7 @@ function GuideCustomIngredient({ ingredient }: { ingredient: CustomIngredient })
           </section>
 
           {/* Pro tip */}
-          <section className="bg-tangerine/10 border-l-4 border-tangerine rounded-r-2xl px-5 py-4 mb-6">
-            <p className="text-sm font-semibold text-cosmos mb-1">Pro Tip</p>
-            <p className="text-sm text-cosmos leading-relaxed">{content.proTip}</p>
-          </section>
+          <ProTipCard text={content.proTip} />
         </>
       )}
 
