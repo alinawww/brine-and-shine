@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
-import { INGREDIENTS, ingredientsBySlug } from '../data/ingredients';
+import { INGREDIENTS, READY_MADE, ingredientsBySlug } from '../data/ingredients';
 import { JAR_SIZES, getScaledRecipe, type JarSize } from '../utils/scaleRecipe';
 import { useJars } from '../hooks/useJars';
 import { useWindowWidth } from '../hooks/useWindowWidth';
 import SpiceSelector from '../components/SpiceSelector';
 import RecipeCard, { renderLines, AromaticsDiff } from '../components/RecipeCard';
+import ReadyMadeRecipeCard from '../components/ReadyMadeRecipeCard';
 import { COMPATIBILITY } from '../data/compatibility';
+import { spices as SPICES } from '../data/spices';
 
 // ── Helpers ──────────────────────────────────────────────────
 
@@ -52,6 +54,8 @@ export default function Builder() {
 
   const brineFromUrl = searchParams.get('brine') as 'salt' | 'vinegar' | null;
   const slugIngredient = slug ? (INGREDIENTS.find(i => i.id === slug) ?? null) : null;
+  const readyMadeRecipe = slug ? (READY_MADE.find(i => i.id === slug) ?? null) : null;
+  const isReadyMade = !!readyMadeRecipe && !slugIngredient;
 
   const [ingredientId, setIngredientId] = useState<string>(() => slug ?? '');
   const [brineType, setBrineType] = useState<'salt' | 'vinegar'>(() => {
@@ -82,6 +86,25 @@ export default function Builder() {
     return () => document.removeEventListener('keydown', onKey);
   }, [isMaximized]);
 
+  useEffect(() => {
+    if (readyMadeRecipe) {
+      setBrineType(readyMadeRecipe.brineType);
+      setJarName(`My ${readyMadeRecipe.name}`);
+    }
+  }, [slug]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (readyMadeRecipe) {
+      const matchedSpices = SPICES.filter(spice =>
+        readyMadeRecipe.spices.some(s =>
+          s.toLowerCase().includes(spice.name.toLowerCase()) ||
+          spice.name.toLowerCase().includes(s.toLowerCase().split('(')[0].trim())
+        )
+      ).map(s => s.slug);
+      setSelectedSpices(matchedSpices);
+    }
+  }, [slug]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const status = isDraft ? 'draft' : 'fermenting';
 
   // Derived values
@@ -94,8 +117,12 @@ export default function Builder() {
     ? getScaledRecipe(ingredientId, brineType, activeGrams)
     : null;
 
-  const backHref  = slugIngredient ? `/ingredient/${slug}` : '/';
-  const backLabel = slugIngredient ? `Back to ${slugIngredient.name} guide` : 'All ingredients';
+  const backHref  = (slugIngredient || isReadyMade) ? `/ingredient/${slug}` : '/';
+  const backLabel = slugIngredient
+    ? `Back to ${slugIngredient.name} guide`
+    : isReadyMade
+      ? `Back to ${readyMadeRecipe!.name} guide`
+      : 'All ingredients';
 
   // Compatible additional ingredients
   const compatible = COMPATIBILITY[ingredientId]?.[brineType] ?? [];
@@ -151,7 +178,9 @@ export default function Builder() {
 
   // ── Recipe card shared element ────────────────────────────────
 
-  const recipeCardEl = (
+  const recipeCardEl = isReadyMade && readyMadeRecipe ? (
+    <ReadyMadeRecipeCard recipe={readyMadeRecipe} grams={activeGrams} />
+  ) : (
     <RecipeCard
       scaledRecipe={scaledRecipe}
       ingredientName={selectedIngredient?.name ?? ''}
@@ -166,7 +195,43 @@ export default function Builder() {
 
   // ── Step 1 content ────────────────────────────────────────────
 
-  const step1 = slugIngredient ? (
+  const step1 = isReadyMade && readyMadeRecipe ? (
+    // Ready-made multi-chip display
+    <div style={{ marginBottom: 40 }}>
+      <SectionHeading done>1. Your ingredients</SectionHeading>
+
+      <span style={{
+        background: '#D4E842', color: '#2A1A4E',
+        borderRadius: 999, padding: '4px 12px',
+        fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700,
+        textTransform: 'uppercase', letterSpacing: '0.10em',
+        marginBottom: 12, display: 'inline-block',
+      }}>
+        Classic Recipe · {readyMadeRecipe.region}
+      </span>
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
+        {readyMadeRecipe.ingredients.map((ing, i) => (
+          <span key={i} style={{
+            background: '#2A1A4E', color: '#FDF4E3',
+            borderRadius: 999, padding: '8px 16px',
+            fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 700,
+            border: '2px solid #D4E842',
+            cursor: 'default',
+            opacity: 0.9,
+          }}>
+            {ing}
+          </span>
+        ))}
+      </div>
+      <p style={{
+        fontFamily: 'var(--font-body)', fontSize: 12,
+        color: '#7A5A9E', marginTop: 8, fontStyle: 'italic',
+      }}>
+        This is a classic recipe — ingredients are fixed
+      </p>
+    </div>
+  ) : slugIngredient ? (
     // Locked ingredient display
     <div style={{ marginBottom: 40 }}>
       <SectionHeading done>1. Your ingredient</SectionHeading>
@@ -633,7 +698,7 @@ export default function Builder() {
                 </div>
 
                 {/* Mobile: recipe card above step 5 */}
-                {isMobile && scaledRecipe && (
+                {isMobile && (scaledRecipe || (isReadyMade && readyMadeRecipe)) && (
                   <div style={{ marginBottom: 40 }}>
                     {recipeCardEl}
                   </div>

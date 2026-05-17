@@ -1,9 +1,12 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useJars, type Jar } from '../hooks/useJars';
-import { ingredientsBySlug, INGREDIENTS } from '../data/ingredients';
+import { useJars } from '../hooks/useJars';
+import { ingredientsBySlug, INGREDIENTS, READY_MADE } from '../data/ingredients';
+import StatusBadge from '../components/StatusBadge';
 import { getScaledRecipe } from '../utils/scaleRecipe';
 import { spicesBySlug } from '../data/spices';
-import StatusBadge from '../components/StatusBadge';
+import { useWindowWidth } from '../hooks/useWindowWidth';
+import { FermentationProgress } from '../components/FermentationProgress';
+import { MEAL_PAIRINGS, DEFAULT_PAIRINGS } from '../data/mealPairings';
 
 function daysSince(dateStr: string): number {
   const start = new Date(dateStr);
@@ -11,25 +14,10 @@ function daysSince(dateStr: string): number {
   return Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
 }
 
-function ProgressBar({ status }: { status: Jar['status'] }) {
-  const steps: Jar['status'][] = ['draft', 'fermenting', 'ready', 'eaten'];
-  const idx = steps.indexOf(status);
-  return (
-    <div style={{ display: 'flex', gap: 6, marginBottom: 24 }}>
-      {steps.map((s, i) => (
-        <div key={s} style={{
-          flex: 1, height: 6, borderRadius: 999,
-          background: i <= idx ? '#D4E842' : 'rgba(42,26,78,0.15)',
-          transition: 'background 300ms ease',
-        }} />
-      ))}
-    </div>
-  );
-}
 
 export default function JarDetail() {
   const { id } = useParams<{ id: string }>();
-  const { jars, updateJar, deleteJar } = useJars();
+  const { jars, deleteJar } = useJars();
   const navigate = useNavigate();
 
   const jar = jars.find(j => j.id === id);
@@ -46,10 +34,14 @@ export default function JarDetail() {
     );
   }
 
+  const isMobile = useWindowWidth() < 768;
   const ingredient = ingredientsBySlug[jar.ingredient];
   const ingredientData = INGREDIENTS.find(i => i.id === jar.ingredient);
+  const readyMadeIngredient = READY_MADE.find(i => i.id === jar.ingredient);
   const scaledRecipe = getScaledRecipe(jar.ingredient, jar.brineType, jar.grams);
   const days = daysSince(jar.dateStarted);
+  const allBenefits: string[] = readyMadeIngredient?.healthBenefits ?? [];
+  const pairings = MEAL_PAIRINGS[jar.ingredient] ?? { meals: DEFAULT_PAIRINGS, note: 'Great with a wide range of dishes.' };
 
   function handleDelete() {
     if (window.confirm(`Delete "${jar!.name}"?`)) {
@@ -80,26 +72,15 @@ export default function JarDetail() {
             </p>
           </div>
         </div>
-        <ProgressBar status={jar.status} />
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-          <StatusBadge status={jar.status} />
-          <select
-            value={jar.status}
-            onChange={e => updateJar(jar.id, { status: e.target.value as Jar['status'] })}
-            style={{
-              fontFamily: 'var(--font-body)', fontSize: 13, padding: '6px 12px',
-              border: '1px solid rgba(196,168,232,0.4)', borderRadius: 10,
-              background: 'rgba(255,255,255,0.8)', color: '#2A1A4E', cursor: 'pointer',
-            }}
-          >
-            <option value="draft">Draft</option>
-            <option value="fermenting">Fermenting</option>
-            <option value="ready">Ready</option>
-            <option value="eaten">Eaten</option>
-          </select>
-        </div>
+        <StatusBadge status={jar.status} />
       </div>
+
+      {/* Fermentation progress */}
+      <FermentationProgress
+        dateStarted={jar.dateStarted}
+        timeline={readyMadeIngredient?.timeline ?? scaledRecipe?.timeline ?? '7 days'}
+        status={jar.status}
+      />
 
       {/* Stats row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 32 }}>
@@ -182,6 +163,47 @@ export default function JarDetail() {
         </div>
       )}
 
+      {/* Health benefits */}
+      {allBenefits.length > 0 && (
+        <section style={{ marginBottom: 32 }}>
+          <h2 style={{
+            fontFamily: '"Bagel Fat One"', fontSize: 28,
+            color: '#2A1A4E', marginBottom: 20,
+          }}>
+            What's good for you 🌿
+          </h2>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+            gap: 12,
+          }}>
+            {allBenefits.map((benefit, i) => (
+              <div key={i} style={{
+                background: '#FDF4E3',
+                border: '1.5px solid rgba(42,26,78,0.1)',
+                borderRadius: 16, padding: '14px 18px',
+                display: 'flex', gap: 12, alignItems: 'flex-start',
+              }}>
+                <span style={{
+                  color: '#D4E842',
+                  fontSize: 16, flexShrink: 0,
+                  marginTop: 1,
+                }}>
+                  {(['✦', '✸', '❋', '✺'] as const)[i % 4]}
+                </span>
+                <span style={{
+                  fontFamily: 'var(--font-body)', fontSize: 14,
+                  fontWeight: 500, color: '#2A1A4E',
+                  lineHeight: 1.5,
+                }}>
+                  {benefit}
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Recipe reference */}
       {scaledRecipe && (
         <div style={{
@@ -216,6 +238,109 @@ export default function JarDetail() {
           </div>
         </div>
       )}
+
+      {/* Ready-made recipe reference */}
+      {readyMadeIngredient && !scaledRecipe && (
+        <div style={{
+          background: '#2A1A4E', borderRadius: 20, padding: '24px 28px', marginBottom: 32,
+        }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: '#FDF4E3', marginBottom: 16 }}>
+            📋 Classic recipe
+          </h2>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+            <div>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#D4E842', marginBottom: 8 }}>
+                🥬 Ingredients
+              </p>
+              {readyMadeIngredient.ingredients.map((ing, i) => (
+                <p key={i} style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'rgba(253,244,227,0.85)', margin: '0 0 4px' }}>
+                  • {ing}
+                </p>
+              ))}
+            </div>
+            <div>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#D4E842', marginBottom: 8 }}>
+                🌿 Spices
+              </p>
+              {readyMadeIngredient.spices.map((spice, i) => (
+                <p key={i} style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'rgba(253,244,227,0.85)', margin: '0 0 4px' }}>
+                  • {spice}
+                </p>
+              ))}
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 12, padding: 14 }}>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700, color: '#D4E842', marginBottom: 4 }}>⏳ Ready in</p>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#FDF4E3', lineHeight: 1.5 }}>{readyMadeIngredient.timeline}</p>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 12, padding: 14 }}>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700, color: '#D4E842', marginBottom: 4 }}>💡 Pro Tip</p>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#FDF4E3', lineHeight: 1.5 }}>{readyMadeIngredient.proTip}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Meal pairings */}
+      <section style={{ marginBottom: 40 }}>
+        <h2 style={{
+          fontFamily: '"Bagel Fat One"', fontSize: 28,
+          color: '#2A1A4E', marginBottom: 8,
+        }}>
+          Pairs well with 🍽️
+        </h2>
+        <p style={{
+          fontFamily: 'var(--font-body)', fontSize: 14,
+          color: '#7A5A9E', marginBottom: 20,
+          fontStyle: 'italic',
+        }}>
+          {pairings.note}
+        </p>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
+          gap: 14,
+        }}>
+          {pairings.meals.map((meal, i) => (
+            <div
+              key={i}
+              style={{
+                background: '#FDF4E3',
+                border: '1.5px solid rgba(42,26,78,0.1)',
+                borderRadius: 18, padding: '16px 20px',
+                display: 'flex', gap: 14, alignItems: 'flex-start',
+                transition: 'all 200ms ease',
+                cursor: 'default',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = 'translateY(-3px)'
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(42,26,78,0.10)'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = ''
+                e.currentTarget.style.boxShadow = ''
+              }}
+            >
+              <span style={{ fontSize: 28, flexShrink: 0 }}>{meal.emoji}</span>
+              <div>
+                <div style={{
+                  fontFamily: '"Bagel Fat One"', fontSize: 16,
+                  color: '#2A1A4E', marginBottom: 4,
+                }}>
+                  {meal.name}
+                </div>
+                <div style={{
+                  fontFamily: 'var(--font-body)', fontSize: 13,
+                  color: '#7A5A9E', lineHeight: 1.4,
+                }}>
+                  {meal.desc}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* Actions */}
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>

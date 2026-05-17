@@ -6,7 +6,7 @@ import StatusBadge from '../components/StatusBadge';
 const STATUS_ORDER: Jar['status'][] = ['ready', 'fermenting', 'draft', 'eaten'];
 
 export default function MyJars() {
-  const { jars, updateJar, deleteJar } = useJars();
+  const { jars, deleteJar } = useJars();
 
   if (jars.length === 0) {
     return (
@@ -102,12 +102,19 @@ export default function MyJars() {
                     <span className="text-xl" aria-hidden="true">
                       {ingredient?.emoji ?? '🫙'}
                     </span>
-                    <h2
-                      className="text-lg text-cosmos truncate"
-                      style={{ fontFamily: 'var(--font-display)' }}
+                    <Link
+                      to={`/jars/${jar.id}`}
+                      style={{ textDecoration: 'none', color: 'inherit' }}
                     >
-                      {jar.name}
-                    </h2>
+                      <h2
+                        className="text-lg text-cosmos truncate"
+                        style={{ fontFamily: 'var(--font-display)', transition: 'opacity 200ms ease' }}
+                        onMouseEnter={e => (e.currentTarget.style.opacity = '0.7')}
+                        onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+                      >
+                        {jar.name}
+                      </h2>
+                    </Link>
                   </div>
                   <p className="text-sm text-muted">
                     {ingredient?.name ?? jar.ingredient} ·{' '}
@@ -121,26 +128,17 @@ export default function MyJars() {
                   )}
                 </div>
 
-                <div className="flex flex-col items-end gap-2 shrink-0" style={{ paddingTop: isDraft ? 20 : 0 }}>
+                <div className="shrink-0" style={{ paddingTop: isDraft ? 20 : 0 }}>
                   <StatusBadge status={jar.status} />
-                  <select
-                    value={jar.status}
-                    onChange={e =>
-                      updateJar(jar.id, { status: e.target.value as Jar['status'] })
-                    }
-                    className="text-xs bg-white/80 border border-lavender/25 rounded-lg px-2 py-1 text-cosmos focus:outline-none focus:border-lavender cursor-pointer"
-                  >
-                    <option value="draft">Draft</option>
-                    <option value="fermenting">Fermenting</option>
-                    <option value="ready">Ready</option>
-                    <option value="eaten">Eaten</option>
-                  </select>
                 </div>
               </div>
 
               <div
-                className="mt-4 pt-3 flex items-center gap-4"
-                style={{ borderTop: '1px solid rgba(196,168,232,0.15)' }}
+                style={{
+                  borderTop: '1px solid rgba(196,168,232,0.15)',
+                  marginTop: 12, paddingTop: 12,
+                  display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
+                }}
               >
                 {isDraft ? (
                   <Link
@@ -156,31 +154,38 @@ export default function MyJars() {
                   <>
                     <Link
                       to={`/jars/${jar.id}`}
-                      className="text-xs font-bold text-cosmos hover:text-cosmos-deep transition-colors"
+                      style={{
+                        fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 700,
+                        padding: '8px 18px', borderRadius: 999,
+                        background: '#2A1A4E', color: '#FDF4E3',
+                        textDecoration: 'none',
+                      }}
                     >
-                      View details →
+                      View details
                     </Link>
                     <Link
-                      to={`/ingredient/${jar.ingredient}`}
-                      className="text-xs text-muted hover:text-cosmos transition-colors"
+                      to={`/build/${jar.ingredient}?brine=${jar.brineType}`}
+                      style={{
+                        fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 700,
+                        padding: '8px 18px', borderRadius: 999,
+                        border: '1.5px solid #2A1A4E',
+                        background: 'transparent', color: '#2A1A4E',
+                        textDecoration: 'none',
+                      }}
                     >
-                      View guide →
+                      Make another
                     </Link>
                   </>
-                )}
-                {!isDraft && (
-                  <Link
-                    to={`/build/${jar.ingredient}`}
-                    className="text-xs text-muted hover:text-cosmos transition-colors"
-                  >
-                    Make another
-                  </Link>
                 )}
                 <button
                   onClick={() => {
                     if (window.confirm(`Delete "${jar.name}"?`)) deleteJar(jar.id);
                   }}
-                  className="text-xs text-muted hover:text-tangerine transition-colors ml-auto cursor-pointer"
+                  style={{
+                    fontFamily: 'var(--font-body)', fontSize: 12,
+                    background: 'transparent', border: 'none',
+                    color: '#7A5A9E', cursor: 'pointer', marginLeft: 'auto',
+                  }}
                 >
                   Delete
                 </button>
