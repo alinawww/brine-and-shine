@@ -7,6 +7,7 @@ import { spicesBySlug } from '../data/spices';
 import { useWindowWidth } from '../hooks/useWindowWidth';
 import { FermentationProgress } from '../components/FermentationProgress';
 import { MEAL_PAIRINGS, DEFAULT_PAIRINGS } from '../data/mealPairings';
+import { MILESTONES } from '../data/milestones';
 
 function daysSince(dateStr: string): number {
   const start = new Date(dateStr);
@@ -81,6 +82,143 @@ export default function JarDetail() {
         timeline={readyMadeIngredient?.timeline ?? scaledRecipe?.timeline ?? '7 days'}
         status={jar.status}
       />
+
+      {/* Milestone timeline */}
+      {(() => {
+        const milestones = MILESTONES[jar.ingredient] ?? []
+        if (milestones.length === 0) return null
+        const now = new Date()
+        const startDate = new Date(jar.dateStarted)
+        const msPerDay = 1000 * 60 * 60 * 24
+        const milestonesWithState = milestones.map(m => ({
+          ...m,
+          reached: (now.getTime() - startDate.getTime()) / msPerDay >= m.day,
+          reachedDate: new Date(startDate.getTime() + m.day * msPerDay),
+        }))
+        return (
+          <section style={{ marginBottom: 40 }}>
+            <h2 style={{
+              fontFamily: '"Bagel Fat One"', fontSize: 28,
+              color: '#2A1A4E', marginBottom: 8,
+            }}>
+              Fermentation Journal 📖
+            </h2>
+            <p style={{
+              fontFamily: 'var(--font-body)', fontSize: 14,
+              color: '#7A5A9E', marginBottom: 28,
+            }}>
+              What's been happening in your jar
+            </p>
+
+            <div style={{ position: 'relative' }}>
+              {/* Vertical line */}
+              <div style={{
+                position: 'absolute',
+                left: 19, top: 0, bottom: 0,
+                width: 2,
+                background: 'rgba(42,26,78,0.1)',
+                zIndex: 0,
+              }} />
+
+              {milestonesWithState.map((m, i) => (
+                <div key={i} style={{
+                  display: 'flex', gap: 20,
+                  marginBottom: 24,
+                  opacity: m.reached ? 1 : 0.4,
+                  position: 'relative', zIndex: 1,
+                }}>
+                  {/* Circle indicator */}
+                  <div style={{
+                    width: 40, height: 40, borderRadius: '50%',
+                    flexShrink: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 16,
+                    background: m.reached
+                      ? m.type === 'ready' ? '#A8D8A8'
+                        : m.type === 'action' ? '#F4845A'
+                        : '#D4E842'
+                      : 'rgba(42,26,78,0.08)',
+                    border: m.reached
+                      ? 'none'
+                      : '2px dashed rgba(42,26,78,0.2)',
+                    color: m.reached ? '#2A1A4E' : '#7A5A9E',
+                  }}>
+                    {m.type === 'ready' ? '🎉'
+                      : m.type === 'action' ? '⚡'
+                      : '👁️'}
+                  </div>
+
+                  {/* Content */}
+                  <div style={{
+                    flex: 1,
+                    background: m.reached ? '#FDF4E3' : 'transparent',
+                    border: m.reached
+                      ? m.type === 'action'
+                        ? '1.5px solid rgba(244,132,90,0.3)'
+                        : '1.5px solid rgba(42,26,78,0.1)'
+                      : '1.5px dashed rgba(42,26,78,0.1)',
+                    borderRadius: 16,
+                    padding: m.reached ? '14px 18px' : '12px 16px',
+                  }}>
+                    {/* Day label */}
+                    <div style={{
+                      fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700,
+                      textTransform: 'uppercase', letterSpacing: '0.10em',
+                      color: '#7A5A9E', marginBottom: 4,
+                    }}>
+                      Day {m.day < 1 ? `${Math.round(m.day * 24)}h` : Math.floor(m.day)}
+                      {m.reached && ` · ${m.reachedDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`}
+                    </div>
+
+                    {/* Title */}
+                    <div style={{
+                      fontFamily: 'var(--font-body)', fontSize: 14, fontWeight: 700,
+                      color: '#2A1A4E', marginBottom: m.reached ? 6 : 0,
+                    }}>
+                      {m.title}
+                    </div>
+
+                    {/* Desc — only if reached */}
+                    {m.reached && (
+                      <div style={{
+                        fontFamily: 'var(--font-body)', fontSize: 13,
+                        color: '#7A5A9E', lineHeight: 1.5,
+                      }}>
+                        {m.desc}
+                      </div>
+                    )}
+
+                    {/* Action box — only if reached and type is action */}
+                    {m.reached && m.type === 'action' && m.action && (
+                      <div style={{
+                        marginTop: 10,
+                        padding: '10px 14px',
+                        background: 'rgba(244,132,90,0.1)',
+                        borderRadius: 10,
+                        borderLeft: '3px solid #F4845A',
+                      }}>
+                        <div style={{
+                          fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700,
+                          textTransform: 'uppercase', letterSpacing: '0.10em',
+                          color: '#F4845A', marginBottom: 4,
+                        }}>
+                          Action needed
+                        </div>
+                        <div style={{
+                          fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 600,
+                          color: '#2A1A4E',
+                        }}>
+                          {m.action}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )
+      })()}
 
       {/* Stats row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 32 }}>

@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useWindowWidth } from '../hooks/useWindowWidth';
+import { NotificationBell } from './NotificationBell';
 
 const NAV_LINKS = [
   { label: 'Build a Jar', to: '/build' },
@@ -52,32 +53,35 @@ export function Navbar() {
         </span>
       </Link>
 
-      {/* Nav links */}
-      <nav style={{ display: 'flex', gap: isMobile ? 4 : 8 }}>
-        {NAV_LINKS.map(({ label, to }) => {
-          const active = pathname === to;
-          return (
-            <Link
-              key={to}
-              to={to}
-              style={{
-                fontFamily: 'var(--font-body)',
-                fontWeight: 700, fontSize: isMobile ? 12 : 14,
-                textDecoration: 'none',
-                padding: isMobile ? '6px 10px' : '6px 14px',
-                borderRadius: 999,
-                color:      active ? '#FDF4E3' : '#2A1A4E',
-                background: active ? '#2A1A4E' : 'transparent',
-                transition: 'all 200ms ease',
-                display: 'inline-block',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {label}
-            </Link>
-          );
-        })}
-      </nav>
+      {/* Nav links + bell */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <nav style={{ display: 'flex', gap: isMobile ? 4 : 8 }}>
+          {NAV_LINKS.map(({ label, to }) => {
+            const active = pathname === to;
+            return (
+              <Link
+                key={to}
+                to={to}
+                style={{
+                  fontFamily: 'var(--font-body)',
+                  fontWeight: 700, fontSize: isMobile ? 12 : 14,
+                  textDecoration: 'none',
+                  padding: isMobile ? '6px 10px' : '6px 14px',
+                  borderRadius: 999,
+                  color:      active ? '#FDF4E3' : '#2A1A4E',
+                  background: active ? '#2A1A4E' : 'transparent',
+                  transition: 'all 200ms ease',
+                  display: 'inline-block',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {label}
+              </Link>
+            );
+          })}
+        </nav>
+        <NotificationBell />
+      </div>
     </header>
   );
 }
